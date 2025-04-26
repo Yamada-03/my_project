@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - node
+    networks:
+      - my_network
+
+  node:
+    build: ./node
+    expose:
+      - "3000"
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=example
+      - DB_NAME=mydb
+    depends_on:
+      - db
+    networks:
+      - my_network
+
+  db:
+    image: mysql:5.7
+    command: --bind-address=0.0.0.0
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: mydb
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - my_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - my_network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+    - grafana_data:/var/lib/grafana    
+    networks:
+      - my_network
+
+  metrics-node:
+    build: ./node/metrics
+    ports:
+      - "9104:9104"
+    networks:
+      - my_network
+    depends_on:
+      - db   
+
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - /path/to/loki/index:/loki/index
+      - /path/to/loki/boltdb-cache:/loki/boltdb-cache
+      - /path/to/loki/chunks:/loki/chunks
+    ports:
+      - "3100:3100"
+    restart: always
+    networks:
+      - my_network
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    volumes:
+      - /var/log:/var/log
+      - ./promtail-config.yaml:/etc/promtail/promtail-config.yaml
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - my_network      
+
+
+volumes:
+  mysql_data:
+  grafana_data: 
+  loki_data:
+  loki_wal:
+
+networks:
+  my_network:
+    driver: bridge
