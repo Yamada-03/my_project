@@ -24,11 +24,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t your-dockerhub-username/my_project_image:latest .
+          docker build -t yamada03/my_project_image:latest .
 
       - name: Push Docker image to DockerHub
         run: |
-          docker push your-dockerhub-username/my_project_image:latest
+          docker push yamada03/my_project_image:latest
 
       - name: Deploy to server
         run: |
