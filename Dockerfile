@@ -4,14 +4,15 @@ FROM node:16
 # アプリケーションの作業ディレクトリを設定
 WORKDIR /app
 
-# package.jsonとpackage-lock.jsonをコピー
-COPY package*.json ./
+# package.jsonとpackage-lock.jsonだけ先にコピー
+COPY node/package.json /app/package.json
+COPY node/package-lock.json /app/package-lock.json
 
-# 必要な依存関係をインストール
+# 依存関係をインストール
 RUN npm install
 
-# ソースコードをコンテナにコピー
-COPY . .
+# そのあとでソースコード全部コピー
+COPY node/ /app
 
-# アプリケーションを起動
+# サーバ起動
 CMD ["npm", "start"]
