@@ -13,6 +13,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 使用しているバージョンに合わせて変更
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Jest tests
+        run: npm run test
+
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
 
@@ -29,5 +43,3 @@ jobs:
       - name: Push Docker image to DockerHub
         run: |
           docker push yamada03/my_project_image:latest
-
-
