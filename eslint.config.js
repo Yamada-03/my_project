@@ -6,20 +6,23 @@ import { defineConfig } from "eslint/config";
 export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs,jsx}"],
-    plugins: { js },
-    extends: ["js/recommended"],
+    plugins: {
+      react: pluginReact,
+    },
     languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: "module",
       globals: {
         ...globals.browser,
-        ...globals.node, // ← これを追加
+        ...globals.node,
+        jest: true,
       },
     },
-  },
-  {
-    files: ["**/*.js"],
-    languageOptions: {
-      sourceType: "commonjs",
+    rules: {
+      // ここにルール追加可能
     },
   },
+  // ✅ Flat Config 用の React 推奨設定
   pluginReact.configs.flat.recommended,
 ]);
+
