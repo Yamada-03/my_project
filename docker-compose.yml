@@ -79,12 +79,12 @@ services:
   promtail:
     image: grafana/promtail:2.9.4
     volumes:
-      - /var/log:/var/log
+      - /var/log:/var/log                # ← 残してOK（syslog用）
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro  # ← 追加（重要！）
       - ./promtail-config.yaml:/etc/promtail/promtail-config.yaml
     command: -config.file=/etc/promtail/promtail-config.yaml
     networks:
-      - my_network      
-
+      - my_network
 
 volumes:
   mysql_data:
