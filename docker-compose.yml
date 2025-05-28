@@ -43,6 +43,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - /etc/localtime:/etc/localtime:ro 
     networks:
       - my_network
 
@@ -52,6 +53,7 @@ services:
       - "3000:3000"
     volumes:
     - grafana_data:/var/lib/grafana    
+    - /etc/localtime:/etc/localtime:ro 
     networks:
       - my_network
 
@@ -70,6 +72,7 @@ services:
       - /path/to/loki/index:/loki/index
       - /path/to/loki/boltdb-cache:/loki/boltdb-cache
       - /path/to/loki/chunks:/loki/chunks
+      - /etc/localtime:/etc/localtime:ro   
     ports:
       - "3100:3100"
     restart: always
@@ -82,15 +85,34 @@ services:
       - /var/log:/var/log                # ← 残してOK（syslog用）
       - /var/lib/docker/containers:/var/lib/docker/containers:ro  # ← 追加（重要！）
       - ./promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - /etc/localtime:/etc/localtime:ro 
     command: -config.file=/etc/promtail/promtail-config.yaml
     networks:
       - my_network
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    pid: "host"
+    networks:
+      - my_network
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($$|/)'
+
 
 volumes:
   mysql_data:
   grafana_data: 
   loki_data:
-  loki_wal:
+  loki_wal: 
 
 networks:
   my_network:

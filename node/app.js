@@ -1,5 +1,6 @@
 const express = require('express');
 const mysql = require('mysql2');
+const log = require('./logger');
 const app = express();
 const port = 3000;
 
@@ -40,6 +41,7 @@ connection.connect(err => {
 });
 
 app.get('/', (req, res) => {
+  log("info", "GET / にアクセスがありました", { route: "/", method: "GET" });
   httpRequestCounter.labels('GET', '/', 200).inc();
   res.send('Hello from Node.js via Nginx!');
 });
@@ -78,6 +80,17 @@ app.post('/users', (req, res) => {
   );
 });
 
+app.get('/error', (req, res) => {
+  log("error", "DB接続失敗", { route: "/error", code: 500 });
+  res.status(500).send("エラー発生");
+});
+
+app.get('/test-log', (req, res) => {
+  log("info", "テストログ出力: /test-log にアクセスされました", { route: "/test-log" });
+  res.send("logテスト成功");
+});
+
 app.listen(port, () => {
   console.log(`Node.js app listening at http://localhost:${port}`);
 });
+
